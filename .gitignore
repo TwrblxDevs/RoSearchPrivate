@@ -1,0 +1,12 @@
+# /node_modules
+# config.json
+# /commands
+# /database
+# /events
+# /schemas
+# deploy.js
+# index.js
+# events.js
+# package-lock.json
+# package.json
+# README.md
