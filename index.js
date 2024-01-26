@@ -35,7 +35,7 @@ client.on(Events.ClientReady, RC => {
 
 	mongoose
     .connect("mongodb+srv://RoDB:RoDB@rosearch.frdmhyd.mongodb.net/", {
-	  dbName: `test`,
+	  dbName: `prod`,
       useNewUrlParser: true,
       useUnifiedTopology: true,
     })
@@ -718,37 +718,37 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 const developerRoleId = '1185236060737904782';
 
-client.on('messageCreate', async (message) => {
-  if (!message.guild) return;
-  if (message.author.id === client.user.id) return;
+// client.on('messageCreate', async (message) => {
+//   if (!message.guild) return;
+//   if (message.author.id === client.user.id) return;
 
-  if (message.mentions.members.size > 0) {
-    const developerId = '919674489581731842';
-    const mentionedMember = message.mentions.members.first();
+//   if (message.mentions.members.size > 0) {
+//     const developerId = '919674489581731842';
+//     const mentionedMember = message.mentions.members.first();
 
 
-    if (
-      mentionedMember.roles.cache.has(developerRoleId) ||
-      message.member.roles.cache.has(developerRoleId)
-    ) {
-      return;
-    }
+//     if (
+//       mentionedMember.roles.cache.has(developerRoleId) ||
+//       message.member.roles.cache.has(developerRoleId)
+//     ) {
+//       return;
+//     }
 
-    const warningEmbed = new EmbedBuilder()
-      .setColor('Yellow')
-      .setTitle('⚠️ Warning!')
-      .setDescription(`Please avoid mentioning the developer (${mentionedMember.user.tag}).`);
+//     const warningEmbed = new EmbedBuilder()
+//       .setColor('Yellow')
+//       .setTitle('⚠️ Warning!')
+//       .setDescription(`Please avoid mentioning the developer (${mentionedMember.user.tag}).`);
 
-    const acknowledgeButton = new ButtonBuilder()
-      .setCustomId('acknowledgeButton')
-      .setLabel('Acknowledge')
-      .setStyle(ButtonStyle.Primary);
+//     const acknowledgeButton = new ButtonBuilder()
+//       .setCustomId('acknowledgeButton')
+//       .setLabel('Acknowledge')
+//       .setStyle(ButtonStyle.Primary);
 
-    const actionRow = new ActionRowBuilder().addComponents(acknowledgeButton);
+//     const actionRow = new ActionRowBuilder().addComponents(acknowledgeButton);
 
-    await message.reply({ embeds: [warningEmbed], components: [actionRow] });
-  }
-});
+//     await message.reply({ embeds: [warningEmbed], components: [actionRow] });
+//   }
+// });
 
 client.on('guildMemberAdd', member => { 
     if(client.guilds.cache.get("1185235395970088970")) {
@@ -899,4 +899,4 @@ client.on(Events.InteractionCreate, async interaction => {
   
 
 
-client.login(config.TESTTOKEN);
+client.login(config.MainToken);
