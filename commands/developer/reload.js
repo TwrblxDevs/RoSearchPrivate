@@ -3,7 +3,7 @@ const { SlashCommandBuilder } = require('discord.js');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('reload')
-		.setDescription('DEVELOPER COMMAND')
+		.setDescription("[RoSearcher Developer Command]")
         .addStringOption(option =>
             option.setName('folder')
             .setDescription("Command Folder")

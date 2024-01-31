@@ -3,7 +3,7 @@ const { ButtonBuilder, ActionRowBuilder, ButtonStyle, SlashCommandBuilder, Embed
 module.exports = {
     data: new SlashCommandBuilder()
     .setName("ban")
-    .setDescription("DEVELOPER COMMAND")
+    .setDescription("[RoSearcher Developer Command]")
     .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
     .addUserOption(option =>
         option.setName("user")

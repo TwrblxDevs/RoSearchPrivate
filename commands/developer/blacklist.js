@@ -131,7 +131,7 @@ const User = require('../../schemas/User');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("blacklist")
-    .setDescription("DEVELOPER COMMAND")
+    .setDescription("[RoSearcher Developer Command]")
     .addUserOption(option => option.setName("user").setRequired(true).setDescription("User to blacklist"))
     .addStringOption(option => option.setName("reason").setRequired(true).setDescription("Blacklist Reason"))
     .addStringOption(option =>

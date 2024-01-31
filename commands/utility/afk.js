@@ -13,7 +13,7 @@ module.exports = {
       option
         .setName("reason")
         .setDescription("Reasoning for going AFK")
-        .setRequired(false)
+        .setRequired(true)
     ),
   /**
    *
@@ -34,7 +34,8 @@ module.exports = {
           UserID: interaction.user.id,
           "afk.isAfk": true,
           "afk.reason": reason,
-        }).then(() => {
+          "afk.name": interaction.user.name,
+              }).then(() => {
           interaction.reply({ embeds: [embed], ephemeral: true });
         });
       } else if (data) {

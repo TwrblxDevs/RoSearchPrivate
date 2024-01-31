@@ -7,7 +7,7 @@ const  clc  = require("cli-color")
 module.exports = {
     data: new SlashCommandBuilder()
     .setName('shutdown')
-    .setDescription("DEVELOPER COMMAND"),
+    .setDescription("[RoSearcher Developer Command]"),
 
     async execute(interaction) {
 

@@ -11,7 +11,7 @@ const BlacklistModel = require('../../schemas/blacklists');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("removeblacklist")
-    .setDescription("DEVELOPER COMMAND")
+    .setDescription("[RoSearcher Developer Command]")
     .addUserOption(option => option.setName("user").setDescription("User to remove").setRequired(true)),
 
   async execute(interaction) {
@@ -45,6 +45,21 @@ module.exports = {
             );
 
           interaction.reply({ embeds: [userNotFoundEmbed] });
+
+          const channel = client.channels.cache.get("1185239093311971348")
+    
+          if (channel) {
+            const userAddedEmbed = new EmbedBuilder()
+              .setTitle('✅ User Removed from the Blacklist')
+              .setColor("Red")
+              .addFields(
+                { name: "UserID", value: user.id },
+              )
+
+            channel.send({ embeds: [userAddedEmbed] }).catch(error => {
+              console.error(`Error sending message to channel: ${error.message}`);
+            });
+          }
         }
       } catch (error) {
         console.error('Error interacting with MongoDB:', error);

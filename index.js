@@ -8,10 +8,16 @@ const axios = require("axios")
 const BanJsonFilePath = "./database/bannedusers.json";
 const User = require("./schemas/User");
 const Blacklists = require("./schemas/blacklists")
+const ModerationModel = require("./schemas/moderation")
 // require("./events/afkMessageCreate.js")
 const mongoose = require("mongoose")
 const config = require('./config.json')
+require('console-emojis');
 
+
+let StatusOverride = false
+let StatusOverrideMessage = ""
+let StatusOverrideType = ""
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.MessageContent,
 ] });
@@ -28,35 +34,163 @@ const OnlineEmbed = new EmbedBuilder()
 .setTitle("Bot has been started")
 .setColor("Green")
 
+const ConnectedToMongoEmbed = new EmbedBuilder()
+.setTitle("Connected to MongoDB Connection")
+.setColor("Green")
+
+const FailedConnectedToMongoEmbed = new EmbedBuilder()
+.setTitle("Failed to connect to MongoDB Connection")
+.setColor("Red")
+
 const BotShuttingDown = new EmbedBuilder()
 .setTitle("Bot Shutdown")
 
-client.on(Events.ClientReady, RC => {
 
-	mongoose
-    .connect("mongodb+srv://RoDB:RoDB@rosearch.frdmhyd.mongodb.net/", {
-	  dbName: `prod`,
+
+client.on('ready', () => {
+  const activities = [
+    { name: `${client.guilds.cache.size} Guilds | ${client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0).toLocaleString()} Users`, type: ActivityType.Watching },
+    { name: 'RoSearcher', type: ActivityType.Listening },
+    { name: 'Im bored', type: ActivityType.Playing },
+    { name: 'https://rosearcher-d7c62.web.app/support', type: ActivityType.Competing}
+  ];
+  
+  let currentActivityIndex = 0;
+
+  mongoose
+    .connect(config.MongoDBURI, {
+      dbName: `prod`,
       useNewUrlParser: true,
       useUnifiedTopology: true,
     })
     .then(() => {
-      console.log("🟩 Connected to Database.");
+      console.log(console.heavy_check_mark(clc.greenBright(" Connected to Database.")));
     })
     .catch((e) => {
       console.error(e)
-      console.log("🟪 Failed Database Connection");
-	  
+      console.log(console.x(clc.redBright(" Failed Database Connection")));
     });
 
-	console.log(clc.greenBright(`Ready! Logged in as`), clc.whiteBright(`${RC.user.tag}`));
-  console.log(clc.greenBright("[Server] Sup im online"))
-  const LogChannel = client.channels.cache.get('1185239390742655006')
-  LogChannel.send({ embeds: [OnlineEmbed]})
+    
+
+  console.log(clc.greenBright(`Ready! Logged in as`), clc.whiteBright(`${client.user.tag}`));
+  console.log(clc.greenBright("[Server] Sup, I'm online"));
+  console.log(clc.greenBright("[Status Override] Status:"), clc.whiteBright(StatusOverride))
+  
+
+  const LogChannel = client.channels.cache.get('1185239390742655006');
+  LogChannel.send({ embeds: [OnlineEmbed] });
+
+  if (!isStatusOverridden()) {
+    updatePresence(client);
+
+    setInterval(() => {
+        currentActivityIndex = (currentActivityIndex + 1) % activities.length;
+        updatePresence(client);
+        console.log(console.heavy_check_mark(clc.greenBright("Updating Status")))
+    }, 60000);
+
+    function updatePresence(client) {
+        const activity = activities[currentActivityIndex];
+
+        client.user.setPresence({
+            activities: [{
+                name: activity.name,
+                type: activity.type,
+            }],
+            status: 'idle',
+        });
+    }
+} else {
     client.user.setPresence({
-        activities: [{ name: `${client.guilds.cache.size} Guilds | ${client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0).toLocaleString()} Users`, type: ActivityType.Watching }],
+        activities: [{
+            name: StatusOverrideMessage,
+            type: StatusOverrideType,
+        }],
         status: 'idle',
-      });
+    });
+}
 });
+
+function isStatusOverridden() {
+  return StatusOverride;
+}
+
+
+  client.on('interactionCreate', async interaction => {
+    if (!interaction.isCommand()) return;
+
+    const command = interaction.commandName;
+
+    if (command === 'status') {
+        const message = interaction.options.getString('message');
+        const type = interaction.options.getString('type');
+
+        StatusOverride = true;
+        StatusOverrideMessage = message;
+        StatusOverrideType = type;
+
+        client.user.setPresence({
+            activities: [{
+                name: message,
+                type: type,
+            }],
+            status: 'idle',
+        });
+
+        await interaction.reply(`Status set to: ${type} ${message}`);
+    }
+});
+
+// client.on("guildCreate", (guild =>{
+//   const Embed = new EmbedBuilder()
+//   .setTitle("Note for Admins/Owner")
+//   .setColor("Yellow")
+//   .setDescription("RoSearcher is currently under maintenance due to an error with the backend it is being fixed.")
+
+//   const C = guild.channels.cache.find(ch => ch.type === "text" && ch.permissionsFor(guild.me).has('SEND_MESSAGES'));
+//   if (C) {
+//     C.send({ embeds: [Embed]})
+//   }
+// }))
+
+// client.on('ready', () => {
+//   mongoose
+//     .connect(config.MongoDBURI, {
+//       dbName: `prod`,
+//       useNewUrlParser: true,
+//       useUnifiedTopology: true,
+//     })
+//     .then(() => {
+//       console.log(clc.greenBright("🟩 Connected to Database."));
+//     })
+//     .catch((e) => {
+//       console.error(e)
+//       console.log(clc.redBright("🟪 Failed Database Connection"));
+//     });
+
+//   console.log(clc.greenBright(`Ready! Logged in as`), clc.whiteBright(`${client.user.tag}`));
+//   console.log(clc.greenBright("[Server] Sup, I'm online"));
+
+//   const LogChannel = client.channels.cache.get('1185239390742655006');
+//   LogChannel.send({ embeds: [OnlineEmbed] });
+
+//   updatePresence(client);
+
+//   setInterval(() => {
+//     updatePresence(client);
+//   }, 60000);
+// });
+
+// function updatePresence(client) {
+//   client.user.setPresence({
+//     activities: [{
+//       name: `${client.guilds.cache.size} Guilds | ${client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0).toLocaleString()} Users`,
+//       type: ActivityType.Watching
+//     }],
+//     status: 'idle',
+//   });
+// }
 
 // if (!data) return;
 //       if (data.afk.isAfk === false) {
@@ -82,6 +216,58 @@ client.on(Events.ClientReady, RC => {
 //       });
 //     }
 
+// client.on('messageCreate',
+//     /**
+//      * @param {Message} message
+//      */
+//     async (message, client) => {
+//       let user; 
+//     user = await User.findOne({ UserID: message.author.id });
+// if (!user) return;
+// if (user.AFK.isAfk === true) {
+//    await user.delete().catch((err) => console.log(err))
+//    await message.reply({ content: `Welcome back ${message.author.name} you were Afk for: ${user.afk.reason}` });
+// } else {
+//   return;
+// }
+// const tagMember = await message.mentions.users.map((msg) => msg.id);
+// if (tagMember.length > 0) {
+//    targetMember.forEach((m) => {
+//    user = await User.findOne({ UserID: m });
+//    if (!user) return;
+
+//    if (user.afk.isAfk) {
+//   return message.reply({ content: `The user is currently AFK for reasoning of ${user.afk.reason}`})
+// }
+// })
+// }
+//     }
+
+//   )
+
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isCommand()) return;
+
+ 
+
+  if (interaction.commandName === 'listguilds') {
+    // Check if the user executing the command is the bot owner
+    if (interaction.user.id !== '919674489581731842') {
+      return interaction.reply('You do not have permission to use this command.');
+    }
+
+    const guildsInfo = client.guilds.cache.map((guild) => {
+      const invite = guild.channels.cache
+        .filter((channel) => channel.type === 'GUILD_TEXT')
+        .first();
+
+      return `${guild.name} (Members: ${guild.memberCount}): [Invite](${invite ? `https://discord.gg/${invite.code}` : 'No invite available'})`;
+    });
+
+    interaction.reply(`Guilds:\n${guildsInfo.join('\n')}`);
+  }
+});
+
 client.on('messageCreate', 
 /**
  * @param {Message} message
@@ -90,10 +276,11 @@ async (message, client) => {
 	User.findOne({ UserID: message.author.id, }).then((data) => {
 		if (!data) return;
 		if (data.afk.isAfk === true) {
-			User.findOneAndUpdate({ "afk.isAfk": false }).then(() => {
-				message.reply({ content: "Removed status"})
+      User.findOneAndDelete({ UserID: message.author.id }).then(() => {
+				message.reply({ content: `Welcome back <@${message.author.id}> you were Afk for: ${data.afk.reason}`})
+        console.log(console.heavy_check_mark(clc.greenBright(` Deleted AFK Data for: ${message.author.id}`)))
 			}); 
-		} else if (data.afk.isAfk === false) {
+		} else if (User.deleteOne({ UserID: message.author.id })) {
 			return;
 		}
 	})
@@ -207,6 +394,84 @@ client.on('unhandledRejection', async (error) => {
 //     }
 // });
 
+// client.on(Events.InteractionCreate, async interaction => {
+//   if (!interaction.isModalSubmit()) return;
+//   if (interaction.customId === 'appelModal') {
+      
+//       const appealreason = interaction.fields.getTextInputValue('appealModalReasoninput');
+
+//       const UserCheckBeforeSendEmbed = new EmbedBuilder()
+//       .setTitle("Appeal Preview")
+//       .setColor("Yellow")
+  
+//       await interaction.reply({ content: 'Your appeal was received successfully!', ephemeral: false });
+
+//       const channel = client.channels.cache.get("1185235397266116610");
+
+//       const AppealEmbed = new EmbedBuilder()
+//           .setTitle("Pending Appeal Request")
+//           .setColor("Yellow")
+//           .addFields(
+//               { name: "Reason", value: `\`${appealreason}\`` },
+//               { name: "Username", value: `${interaction.user.username}` },
+//               { name: "ID", value: `${interaction.user.id}` }
+//           );
+
+//       const AppealDeniedEmbed = new EmbedBuilder()
+//           .setTitle("Your appeal has been Denied")
+//           .setColor("Red")   
+
+      
+
+//       const accept = new ButtonBuilder()
+//           .setCustomId("AppealAccept")
+//           .setLabel("Remove Blacklist")
+//           .setStyle(ButtonStyle.Success);
+
+//       const deny = new ButtonBuilder()
+//           .setCustomId("AppealDeny")
+//           .setLabel("Deny Blacklist")
+//           .setStyle(ButtonStyle.Danger);
+
+//       const row = new ActionRowBuilder()
+//           .addComponents(accept, deny);
+
+//       const response = await channel.send({ embeds: [AppealEmbed], components: [row] });
+
+//       const collectorFilter = m => m.customId === "AppealAccept" || m.customId === "AppealDeny";
+//       const collector = response.createMessageComponentCollector({ filter: collectorFilter, time: 60000 }); // Set your desired time
+
+//       collector.on('collect', async m => {
+//           if (m.user.id !== '919674489581731842') {
+//               await m.reply({ content: 'You are not authorized to use these buttons.', ephemeral: true });
+//               return;
+//           }
+
+//           if (m.customId === "AppealAccept") {
+//               await blacklists.deleteOne({ UserID: interaction.user.id });
+//               await m.update({ content: `Appeal Accepted and Removed from MongoDB Collection`, components: [] });
+//               const AppealAccepted = new EmbedBuilder()
+//               .setTitle("Your appeal has been Accepted")
+//               .setDescription(`${m.user.name} has Accepted your Appeal`)
+//               .addFields(
+//                 { name: `Appealed Reason` , value: appealreason}
+//               ) 
+//               interaction.user.send({ embeds: [AppealAccepted]})
+//           } else if (m.customId === 'AppealDeny') {
+//            await m.update({ content: 'Appeal Denied', components: [] });
+//               interaction.user.send({ embeds: [AppealDeniedEmbed]});
+//           }
+//           collector.stop();
+//       });
+
+//       collector.on('end', collected => {
+//           if (collected.size === 0) {
+//               interaction.followUp({ content: 'Confirmation not received, cancelling', ephemeral: false });
+//           }
+//       });
+//   }
+// });
+
 client.on(Events.InteractionCreate, async interaction => {
   if (!interaction.isModalSubmit()) return;
   if (interaction.customId === 'appelModal') {
@@ -232,7 +497,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
       const AppealDeniedEmbed = new EmbedBuilder()
           .setTitle("Your appeal has been Denied")
-          .setColor("Red")   
+          .setColor("Red");   
 
       const accept = new ButtonBuilder()
           .setCustomId("AppealAccept")
@@ -254,27 +519,51 @@ client.on(Events.InteractionCreate, async interaction => {
 
       collector.on('collect', async m => {
           if (m.user.id !== '919674489581731842') {
+            const noUseEmbed = new EmbedBuilder()
+            .setTitle("You are not authorized to use these buttons.")
+            .setColor("Red")
+
+
               await m.reply({ content: 'You are not authorized to use these buttons.', ephemeral: true });
               return;
           }
 
           if (m.customId === "AppealAccept") {
-              await blacklists.deleteOne({ UserID: interaction.user.id });
-              await m.update({ content: `Appeal Accepted and Removed from MongoDB Collection`, components: [] });
+              await handleAppealAcceptance(interaction.user, appealreason, m);
           } else if (m.customId === 'AppealDeny') {
-           await m.update({ content: 'Appeal Denied', components: [] });
-              interaction.user.send({ embeds: [AppealDeniedEmbed]});
+              await handleAppealDenial(interaction.user, AppealDeniedEmbed, m);
           }
           collector.stop();
       });
 
       collector.on('end', collected => {
           if (collected.size === 0) {
+        
+
               interaction.followUp({ content: 'Confirmation not received, cancelling', ephemeral: false });
           }
       });
   }
 });
+
+async function handleAppealAcceptance(user, appealreason, interaction) {
+  await blacklists.deleteOne({ UserID: user.id });
+  await interaction.update({ content: `Appeal Accepted and Removed from MongoDB Collection`, components: [], embeds: [] });
+  const AppealAccepted = new EmbedBuilder()
+      .setTitle("Your appeal has been Accepted")
+      .setDescription(`${interaction.user.username} has Accepted your Appeal`)
+      .addFields(
+          { name: `Appealed Reason`, value: appealreason }
+      )
+      .setColor("Green")
+  user.send({ embeds: [AppealAccepted] });
+}
+
+
+async function handleAppealDenial(user, AppealDeniedEmbed, interaction) {
+    await interaction.update({ content: 'Appeal Denied', components: [], embeds: [] });
+    user.send({ embeds: [AppealDeniedEmbed] });
+}
 
 
 // client.on(Events.InteractionCreate, async interaction => {
@@ -668,7 +957,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
             const errorEmbed = new EmbedBuilder()
                 .setTitle('An Error has Occurred')
                 .setColor("Red")
-                .setDescription(`Discord.js Error: ${error.message}`);
+                .setDescription(`Discord.js Error: ${error}`);
 
             user.send({ embeds: [errorEmbed] })
                 .then(() => console.log('Error message sent successfully.'))
@@ -750,26 +1039,53 @@ const developerRoleId = '1185236060737904782';
 //   }
 // });
 
-client.on('guildMemberAdd', member => { 
-    if(client.guilds.cache.get("1185235395970088970")) {
-    	 member.roles.add(member.guild.roles.cache.get("1185237211705253899"));
-		const embed = new EmbedBuilder()
-		.setColor('Green')
-		.setTitle("Welcome to the RoSearcher Support Server")
-		.setDescription(`Welcome ${member.user.username} to our server! Enjoy your stay.`)
-		.addFields(
-			{ name: "Support Channels", value: 'Quick help: <#1185280419302740040>, Tickets: <#1185280451984756736>'},
-			{ name: 'Must do', value: "Please Read the Rules: <#1185281570127483002>"}
-		)
+// client.on('guildMemberAdd', member => { 
+//     if(client.guilds.cache.get("1185235395970088970")) {
+//       if (interaction.guild.id === "1185235395970088970") {
+//     	 member.roles.add(member.guild.roles.cache.get(1185237211705253899));
+// 		const embed = new EmbedBuilder()
+// 		.setColor('Green')
+// 		.setTitle("Welcome to the RoSearcher Support Server")
+// 		.setDescription(`Welcome ${member.user.username} to our server! Enjoy your stay.`)
+// 		.addFields(
+// 			{ name: "Support Channels", value: 'Quick help: <#1185280419302740040>, Tickets: <#1185280451984756736>'},
+// 			{ name: 'Must do', value: "Please Read the Rules: <#1185281570127483002>"}
+// 		)
 
     
 
-		const channel = member.guild.channels.cache.find(channel => channel.name === 'general');
-        if (channel) {
-          channel.send({ embeds: [embed]});
-        }
+// 		const channel = member.guild.channels.cache.find(channel => channel.name === 'general');
+//         if (channel) {
+//           channel.send({ embeds: [embed]});
+//         }
+//     } else {
+//       console.log(console.x(clc.redBright(" Wrong Guild Ignoring guildMemberAdd")))
+//     }
+//   }
+// });
+
+client.on('guildMemberAdd', member => {
+  if (member.guild.id === "1185235395970088970") {
+    member.roles.add(member.guild.roles.cache.get("1185237211705253899"));
+    
+    const embed = new EmbedBuilder()
+      .setColor('Green')
+      .setTitle("Welcome to the RoSearcher Support Server")
+      .setDescription(`Welcome ${member.user.username} to our server! Enjoy your stay.`)
+      .addFields(
+        { name: "Support Channels", value: 'Quick help: <#1185280419302740040>, Tickets: <#1185280451984756736>' },
+        { name: 'Must do', value: "Please Read the Rules: <#1185281570127483002>" }
+      );
+
+    const channel = member.guild.channels.cache.find(channel => channel.name === 'general');
+    if (channel) {
+      channel.send({ embeds: [embed] });
     }
+  } else {
+    console.log(console.x(clc.redBright(" Wrong Guild Ignoring guildMemberAdd")));
+  }
 });
+
 
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isButton()) return;
