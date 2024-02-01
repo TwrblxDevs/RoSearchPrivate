@@ -45,9 +45,7 @@ module.exports = {
                 { name: 'Websocket Heartbeat: ', value: `${interaction.client.ws.ping}ms` },
                 { name: 'Roundtrip Latency: ', value: `${sent.createdTimestamp - interaction.createdTimestamp}ms` },
                 { name: 'Server Count: ', value: `${interaction.client.guilds.cache.size}` },
-                { name: 'Ram and CPU Usage: ', value: `${(process.memoryUsage().rss / 1024 / 1024).toFixed(2)}MB / ${(
-                        process.cpuUsage().user / 1000
-                    ).toFixed(2)}%` },
+                { name: 'Ram and CPU Usage: ', value: `${(process.memoryUsage().rss / 1024 / 1024).toFixed(2)}MB / ${( process.cpuUsage().user / 1000 ).toFixed(2)}%` },
                 { name: 'Discord.js Version: ', value: `${discordJsVersion}` },
                 { name: 'Node.js Version: ', value: `${nodeJsVersion}` }
             );

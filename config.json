@@ -1,8 +1,11 @@
 {
     "MainToken":  "MTE4MjY4MjEyMTA5NDA0OTkyMw.Gvd8Pd.eclXM0hHljBGZvNr1RcWnn4DJLpQUG8ziQS0rM",
-    "TESTTOKEN" : "MTE5MjM4NDY0MjI5MzE5MDY1Ng.GnQwEX.G3smN6kC64wXQDTwWrQB8Fvz2XL4CoKC4XXXtM",
+    "TESTTOKEN" : "MTE5MjM4NDY0MjI5MzE5MDY1Ng.Gs3Evw.3eP-VTS8KdbIPClMyh39wuPu-gTgso16u4rmbs",
     "MongoDBURI": "mongodb+srv://RoDB:RoDB@rosearch.frdmhyd.mongodb.net/",
     "StaffGuildID": "1185235395970088970",
     "BotstaffRoleID": "1200587720062414859",
-    "staffIds": ["919674489581731842"]
+    "staffIds": ["919674489581731842"],
+    "TestID" : "1192384642293190656",
+    "PayPalID": "AQSyETOsfnBxNZlQ8S7sP9F5GmlH-6ZHo_c3qWYbyiQzS2Kfoz8d1rcfdF3GLRKlkzYXRPqbogWHX8_e",
+    "PayPalAPISecretKey": "ENW0oZkqGrp04tzwTi2bjU8daZyU1ceA5GjVMJyVAEMmjtasJaDU0xulC1thLslce564NhwWJAJ22fWq"
  }

@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits, ActivityType, AttachmentBuilder, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, WebhookClient, Message } = require('discord.js');
+const { Client, Collection, Events, GatewayIntentBits, ActivityType, AttachmentBuilder, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, WebhookClient, Message, Embed } = require('discord.js');
 const Canvas = require('@napi-rs/canvas');
 const { request, RetryHandler } = require('undici');
 const clc = require("cli-color")
@@ -45,6 +45,45 @@ const FailedConnectedToMongoEmbed = new EmbedBuilder()
 const BotShuttingDown = new EmbedBuilder()
 .setTitle("Bot Shutdown")
 
+function LogServerSuccess(msg) {
+  console.log(clc.bgBlueBright("[SERVER]"), clc.whiteBright(msg))
+}
+
+
+async function checkPayPalConnection(clientId, clientSecret) {
+  const tokenUrl = "https://api.paypal.com/v1/oauth2/token"
+  try {
+    // Send a request to get an access token
+    const tokenResponse = await axios.post(tokenUrl, 
+        new URLSearchParams({
+            'grant_type': 'client_credentials'
+        }), 
+        {
+            auth: {
+                username: clientId,
+                password: clientSecret
+            },
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }
+    );
+
+    if (tokenResponse.status === 200) {
+        const accessToken = tokenResponse.data.access_token;
+        console.log(`Successfully connected to PayPal API. Access Token: ${accessToken}`);
+        return true;
+    } else {
+        console.error(`Failed to connect to PayPal API. Status Code: ${tokenResponse.status}`);
+        return false;
+    }
+
+} catch (error) {
+    console.error(clc.bgRedBright("[PAYAPL ERROR]"),clc.redBright(`Exception while connecting to PayPal API: ${error.message}`));
+    return false;
+}
+}
+
 
 
 client.on('ready', () => {
@@ -65,6 +104,7 @@ client.on('ready', () => {
     })
     .then(() => {
       console.log(console.heavy_check_mark(clc.greenBright(" Connected to Database.")));
+      
     })
     .catch((e) => {
       console.error(e)
@@ -74,8 +114,11 @@ client.on('ready', () => {
     
 
   console.log(clc.greenBright(`Ready! Logged in as`), clc.whiteBright(`${client.user.tag}`));
-  console.log(clc.greenBright("[Server] Sup, I'm online"));
-  console.log(clc.greenBright("[Status Override] Status:"), clc.whiteBright(StatusOverride))
+  console.log(clc.bgGreenBright("[Server]"),clc.greenBright("Sup, I'm online"));
+  console.log(clc.bgGreenBright("[Status Override] "),clc.greenBright("Status:"), clc.whiteBright(StatusOverride))
+  checkPayPalConnection(config.PayPalID, config.PayPalAPISecretKey)
+  LogServerSuccess("Bot has been fully Started and running!")
+  LogServerSuccess(`Bot Data: ${client.guilds.cache.size} Guilds | ${client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0).toLocaleString()} Users`)
   
 
   const LogChannel = client.channels.cache.get('1185239390742655006');
@@ -87,7 +130,7 @@ client.on('ready', () => {
     setInterval(() => {
         currentActivityIndex = (currentActivityIndex + 1) % activities.length;
         updatePresence(client);
-        console.log(console.heavy_check_mark(clc.greenBright("Updating Status")))
+        console.log(console.heavy_check_mark(clc.greenBright(" Updating Status")))
     }, 60000);
 
     function updatePresence(client) {
@@ -256,6 +299,9 @@ client.on('interactionCreate', async (interaction) => {
       return interaction.reply('You do not have permission to use this command.');
     }
 
+    await interaction.deferReply();
+
+
     const guildsInfo = client.guilds.cache.map((guild) => {
       const invite = guild.channels.cache
         .filter((channel) => channel.type === 'GUILD_TEXT')
@@ -264,7 +310,13 @@ client.on('interactionCreate', async (interaction) => {
       return `${guild.name} (Members: ${guild.memberCount}): [Invite](${invite ? `https://discord.gg/${invite.code}` : 'No invite available'})`;
     });
 
+    const Guildsembed = new EmbedBuilder()
+    .setTitle("Guilds")
+    .setColor("Green")
+    .setDescription(guildsInfo.join('\n'))
+
     interaction.reply(`Guilds:\n${guildsInfo.join('\n')}`);
+
   }
 });
 
@@ -1215,4 +1267,4 @@ client.on(Events.InteractionCreate, async interaction => {
   
 
 
-client.login(config.MainToken);
+client.login(config.TESTTOKEN);
