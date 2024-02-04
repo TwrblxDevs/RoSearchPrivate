@@ -6,6 +6,6 @@
     "BotstaffRoleID": "1200587720062414859",
     "staffIds": ["919674489581731842"],
     "TestID" : "1192384642293190656",
-    "PayPalID": "AQSyETOsfnBxNZlQ8S7sP9F5GmlH-6ZHo_c3qWYbyiQzS2Kfoz8d1rcfdF3GLRKlkzYXRPqbogWHX8_e",
-    "PayPalAPISecretKey": "ENW0oZkqGrp04tzwTi2bjU8daZyU1ceA5GjVMJyVAEMmjtasJaDU0xulC1thLslce564NhwWJAJ22fWq"
+    "PayPalID": "",
+    "PayPalAPISecretKey": ""
  }
