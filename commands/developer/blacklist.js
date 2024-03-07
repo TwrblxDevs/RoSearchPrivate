@@ -139,8 +139,9 @@ module.exports = {
         .setRequired(true)
         .setDescription("Blacklist Type")
         .addChoices(
-          { name: 'Permanent', value: 'Permanent'},
-          { name: "Temp", value : "Temp"}
+          { name: 'Perm', value: 'Perm'},
+          { name: "Temp", value : "Temp"},
+          { name: "Unappealable", value: "Unappealable"}
         )
       ),
 
@@ -188,9 +189,17 @@ module.exports = {
                   .setFooter(
                     { text: 'Offical RoSearcher Blacklist'}
                   )
+
+                  const InfoEmbed = new EmbedBuilder()
+                  .setTitle("Blacklist Info")
+                  .setColor("Red")
+                  .addFields(
+                    { name: "Reason", value: `${reason}` }
+                  )
+
   
                   
-                  user.send({ embeds: [UserEmbed]}).catch(e => {
+                  user.send({ embeds: [UserEmbed, InfoEmbed]}).catch(e => {
                     console.error(clc.redBright("[ERROR]:"), clc.red(e.message))
                   })
 
@@ -201,12 +210,15 @@ module.exports = {
                 const userAddedEmbed = new EmbedBuilder()
                   .setTitle('✅ User Added to the Blacklist')
                   .setColor('Yellow')
+                  
                   .addFields(
                     { name: "UserID", value: user.id },
                     { name: "Reason", value: reason },
                     { name: 'Type', value: type },
                     { name: "Moderator", value: interaction.user.username }
                   )
+
+                  console.log(clc.bgRedBright("[BOT LOGS]"), clc.redBright(`Blacklist Added: ${user.username}, Moderator: ${interaction.user.username}, Reason: ${reason}, Type: ${type}`))
     
                 channel.send({ embeds: [userAddedEmbed] }).catch(error => {
                   console.error(`Error sending message to channel: ${error.message}`);

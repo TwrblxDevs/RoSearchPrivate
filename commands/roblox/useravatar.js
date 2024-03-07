@@ -128,7 +128,11 @@ module.exports = {
             await interaction.reply({ embeds: [UserEmbed] });
         } catch (error) {
             console.error(error.message);
-            await interaction.reply(error.message);
+            const ErrorEmbed = new EmbedBuilder()
+            .setTitle("Error")
+            .setColor("Red")
+            .setDescription(error.message)
+            await interaction.reply({ embeds: [ErrorEmbed] });
         }
     }
 };

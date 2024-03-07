@@ -2,7 +2,7 @@ const { REST, Routes } = require('discord.js');
 const fs = require('node:fs');
 const path = require('node:path');
 const { Webhook } = require('discord-webhook-node');
-const hook = new Webhook("https://discord.com/api/webhooks/1192035421690019960/v0QurSx25tq5S9YXmmbAVZjjkbdW_5V_yFz-2lIpdHPrDAEixhFGD-doWPcECVyMoKVq");
+const hook = new Webhook("https://discord.com/api/webhooks/1210298922980085811/5ICu6Lr4cdFx0UJXYq_jGWsKaEmvkp4RHfA8DbPrj3LZB_426k9BiRDXsbLKoC7X0VLz");
 const config = require("./config.json")
 
 const clientId = "1182682121094049923"
@@ -32,14 +32,14 @@ for (const folder of commandFolders) {
 	}
 }
 
-const rest = new REST().setToken(config.TESTTOKEN);
+const rest = new REST().setToken(config.MainToken);
 
 (async () => {
 	try {
 		console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
 		const data = await rest.put(
-            Routes.applicationCommands(config.TestID),
+            Routes.applicationCommands(clientId),
             { body: commands },
         );
 

@@ -43,16 +43,18 @@ module.exports = {
 
             modal.addComponents(firstActionRow)
 
-        if (interaction.user.id === "919674489581731842") {
-
             await interaction.showModal(modal)
-            interaction.options.getMember('user').ban(BanReason)
-        }
+
+        // if (interaction.user.id === "919674489581731842") {
+
+        //     await interaction.showModal(modal)
+        //     interaction.options.getMember('user').ban(BanReason)
+        // }
                
               
 
-        if (interaction.user.id != "919674489581731842") {
-            interaction.reply({ embeds: [notadevEmbed]});
-        }
+        // if (interaction.user.id != "919674489581731842") {
+        //     interaction.reply({ embeds: [notadevEmbed]});
+        // }
     }
 }

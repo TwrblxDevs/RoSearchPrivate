@@ -6,6 +6,10 @@ const User = new Schema({
     isAfk: { type: Boolean, default: false },
     reason: { type: String },
   },
+  Notifs: {
+    isSubbed: { type: Boolean, default: true}
+  },
+  
 });
 
 module.exports = model("Users", User);

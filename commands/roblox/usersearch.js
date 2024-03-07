@@ -401,7 +401,8 @@ module.exports = {
 
                 return response.data.data;
             } catch (error) {
-                throw error;
+                console.log(`API Error: ${error}`)
+
             }
         }
 
@@ -410,9 +411,11 @@ module.exports = {
 
             try {
                 const response = await axios.get(apiUrl);
+                console.log(`User Search Pull Request Data Incoming`)
                 return response.data;
+               
             } catch (error) {
-                throw error;
+              console.log(`API Error: ${error}`)
             }
         }
 
@@ -423,7 +426,7 @@ module.exports = {
                 const response = await axios.get(apiUrl);
                 return response.data?.data[0].imageUrl;
             } catch (error) {
-                throw error;
+                console.log(`API Error: ${error}`)
             }
         }
 
@@ -434,7 +437,7 @@ module.exports = {
                 const response = await axios.get(apiUrl);
                 return response.data.count;
             } catch (error) {
-                throw error;
+                console.log(`API Error: ${error}`)
             }
         }
 
